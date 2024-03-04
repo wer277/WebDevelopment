@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <script>
+        let text = '';
+        let history = [];
+        function gen() {
+            const mainDiv = document.getElementById("main");
+            const buttons = [
+                '1', '2', '3', '4', 'C', 'AC',
+                '5', '6', '7', '8', '*', '/',
+                '9', '0', '.', '=', '+', '-'
+            ];
+            for (let i = 0; i < 3; i++) {
+                const rowDiv = document.createElement("div");
+                rowDiv.classList.add("button-row");
+                for (let j = 0; j < 6; j++) {
+                    const key = i * 6 + j;
+                    const button = document.createElement("button");
+                    button.innerText = buttons[key];
+                    button.onclick = buttonClick;
+                    button.dataset.value = buttons[key];
+                    button.classList.add("button");
+                    rowDiv.appendChild(button);
+                }
+                mainDiv.appendChild(rowDiv);
+            }
+            const display = document.createElement("div");
+            display.classList.add("display");
+            mainDiv.appendChild(display);
+
+            const clearHistoryButton = document.createElement("button");
+            clearHistoryButton.innerText = "Clear history";
+            clearHistoryButton.onclick = clearHistory;
+            clearHistoryButton.classList.add("clear-history-button");
+            mainDiv.appendChild(clearHistoryButton);
+        }
+
+        function buttonClick() {
+            const value = this.dataset.value;
+            if (value == '=') {
+                result();
+            } else if (value == 'AC') {
+                clear();
+            } else if (value == 'C') {
+                deleteLast();
+            } else {
+                text += value;
+            }
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            const displayArea = document.querySelector(".display");
+            displayArea.innerText = text;
+        }
+
+        function result() {
+            let result;
+            try {
+                result = eval(text);
+            } catch (error) {
+                result = "Error";
+            }
+            history.push({ expression: text, result: result });
+            updateHistory();
+            text = '';
+            updateDisplay();
+        }
+
+        function clear() {
+            text = '';
+            updateDisplay();
+        }
+
+        function deleteLast() {
+            text = text.slice(0, -1);
+            updateDisplay();
+        }
+
+        function updateHistory() {
+            const historyArea = document.querySelector(".history");
+            historyArea.innerHTML = '';
+            for (let i = history.length - 1; i >= 0; i--) {
+                const item = history[i];
+                const historyItem = document.createElement("history");
+                historyItem.textContent = `${item.expression} = ${item.result}`;
+                historyArea.appendChild(historyItem);
+            }
+        }
+
+        function clearHistory() {
+            history = [];
+            updateHistory();
+        }
+    </script>
+</head>
+
+<body onload="gen()">
+    <div class="calculator-container">
+        <div class="calculator" id="main"></div>
+        <div class="history" id="history"></div>
+    </div>
+</body>
+
+</html>
