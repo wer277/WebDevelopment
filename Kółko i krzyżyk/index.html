@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <script>
+        let currentPlayer = 'O';
+        let gameBoard = [
+            ['', '', ''],
+            ['', '', ''],
+            ['', '', '']
+        ];
+
+        let mode = 'multiplayer';
+
+        function gen() {
+            const mainDiv = document.getElementById("main");
+            for (let i = 0; i < 3; i++) {
+                const rowDiv = document.createElement("div");
+                rowDiv.classList.add("button-row");
+                for (let j = 0; j < 3; j++) {
+                    const button = document.createElement("button");
+                    button.onclick = buttonClick;
+                    button.dataset.row = i;
+                    button.dataset.col = j;
+                    button.classList.add("game-button"); 
+                    rowDiv.appendChild(button);
+                }
+                mainDiv.appendChild(rowDiv);
+            }
+
+            const modeDiv = document.getElementById("mode");
+
+            const multiplayerButton = document.createElement("button");
+            multiplayerButton.innerText = "Gra wieloosobowa";
+            multiplayerButton.onclick = () => changeMode('multiplayer');
+            multiplayerButton.classList.add("mode-button"); 
+            modeDiv.appendChild(multiplayerButton);
+
+            const computerButton = document.createElement("button");
+            computerButton.innerText = "Gra z komputerem";
+            computerButton.onclick = () => changeMode('computer');
+            computerButton.classList.add("mode-button"); 
+            modeDiv.appendChild(computerButton);
+
+            const resetButton = document.createElement("button");
+            resetButton.innerText = "Resetuj grę";
+            resetButton.onclick = resetGame;
+            resetButton.classList.add("reset-button"); 
+            modeDiv.appendChild(resetButton);
+        }
+
+        function buttonClick() {
+            const row = parseInt(this.dataset.row);
+            const col = parseInt(this.dataset.col);
+            const button = this;
+
+            if (gameBoard[row][col] === '' && mode === 'multiplayer') {
+                gameBoard[row][col] = currentPlayer;
+                button.innerText = currentPlayer;
+
+                if (checkWinner()) {
+                    display();
+                } else {
+                    if (isBoardFull()) {
+                        alert("Remis!");
+                        resetGame();
+                    } else {
+                        currentPlayer = (currentPlayer === 'O') ? 'X' : 'O';
+                    }
+                }
+            }
+            else if (gameBoard[row][col] === '' && mode === 'computer') {
+                gameBoard[row][col] = currentPlayer;
+                button.innerText = currentPlayer;
+
+                if (checkWinner()) {
+                    display();
+                } else {
+                    if (isBoardFull()) {
+                        alert("Remis!");
+                        resetGame();
+                    } else {
+                        currentPlayer = (currentPlayer === 'O') ? 'X' : 'O';
+                        computerMove();
+                    }
+                }
+            }
+        }
+
+
+
+        function isBoardFull() {
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 3; j++) {
+                    if (gameBoard[i][j] === '') {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        function computerMove() {
+            let row, col;
+            do {
+                row = Math.floor(Math.random() * 3);
+                col = Math.floor(Math.random() * 3);
+            } while (gameBoard[row][col] !== '');
+
+            gameBoard[row][col] = currentPlayer;
+            const computerButton = document.querySelector(`.game-button[data-row='${row}'][data-col='${col}']`);
+            computerButton.innerText = currentPlayer;
+
+            if (checkWinner()) {
+                display();
+            } else {
+                currentPlayer = (currentPlayer === 'O') ? 'X' : 'O';
+            }
+        }
+
+        function changeMode(selectedMode) {
+            mode = selectedMode;
+            resetGame();
+        }
+
+        function checkWinner() {
+            // Check rows
+            for (let i = 0; i < 3; i++) {
+                if (gameBoard[i][0] === currentPlayer && gameBoard[i][1] === currentPlayer && gameBoard[i][2] === currentPlayer) {
+                    return true;
+                }
+            }
+
+            // Check columns
+            for (let i = 0; i < 3; i++) {
+                if (gameBoard[0][i] === currentPlayer && gameBoard[1][i] === currentPlayer && gameBoard[2][i] === currentPlayer) {
+                    return true;
+                }
+            }
+
+            // Check diagonals
+            if ((gameBoard[0][0] === currentPlayer && gameBoard[1][1] === currentPlayer && gameBoard[2][2] === currentPlayer) ||
+                (gameBoard[0][2] === currentPlayer && gameBoard[1][1] === currentPlayer && gameBoard[2][0] === currentPlayer)) {
+                return true;
+            }
+
+            return false;
+        }
+
+        function display() {
+                const buttons = document.querySelectorAll('.game-button');
+                buttons.forEach(button => {
+                    button.disabled = true;
+                });
+
+                setTimeout(function () {
+                    alert(currentPlayer + " wins!");
+                    buttons.forEach(button => {
+                        button.disabled = false;
+                    });
+                    resetGame();
+                }, 1000); 
+            }
+
+
+
+
+        function resetGame() {
+            currentPlayer = 'O';
+            gameBoard = [
+                ['', '', ''],
+                ['', '', ''],
+                ['', '', '']
+            ];
+            const buttons = document.querySelectorAll('.game-button'); 
+            buttons.forEach(button => {
+                button.innerText = '';
+            });
+        }
+
+    </script>
+</head>
+
+<body onload="gen()">
+    <div id="mode">
+        <h3>Zaczynamy od: O</h3>
+    </div>
+    <div class="container">
+        <div class="oxo" id="main"></div>
+    </div>
+</body>
+
+</html>
